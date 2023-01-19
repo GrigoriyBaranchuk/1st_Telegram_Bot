@@ -30,15 +30,13 @@ def start(message):
         bot.send_message(message.chat.id, f'привет {first_name}', reply_markup=markup)
     else:
         bot.send_message(message.chat.id, f'Привет {first_name} мы уже общались и у вас уже есть таблица'
-                                          f' просто добавьте новый день',
+                                          f' просто нажмите уснул малыш или проснулся',
                          reply_markup=markup)
 
 
 @bot.message_handler(regexp='^[0-2][0-3]:[0-5][0-9]$')
 def handle_time(message):
     new_var = datetime.strptime(message.text.strip(), '%H:%M').time()
-    # import pdb
-    # pdb.set_trace()
 
 
 @bot.message_handler(content_types=['text'])
@@ -46,10 +44,7 @@ def handle_text(message):
     user_table = table(user_spreadsheetId(message))
     worksheet = user_table.get_worksheet(0)
 
-    if message.text.strip() == 'Добавить день':
-        create_new_day(user_table.id)
-
-    elif message.text.strip() == 'Уснул':
+    if message.text.strip() == 'Уснул':
         create_new_day(user_table.id)
 
         cell = generator(worksheet.findall("Уснул"))
@@ -62,8 +57,9 @@ def handle_text(message):
         else:
             upload_cell(users_table=user_table.id, row=row, column=column, data=now_time())
             bot.send_message(message.chat.id, f'малыш уснул в {now_time()}')
-            markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
 
+
+            markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
             markup.add(types.KeyboardButton('Проснулся'))
             bot.send_message(message.chat.id, f'добавить следующее действие', reply_markup=markup)
 
