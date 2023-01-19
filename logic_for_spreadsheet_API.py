@@ -1,4 +1,8 @@
 import gspread
+from logic import now_date
+
+
+
 """'turnkey-aleph-372212-94f79b4408eb.json'"""
 
 
@@ -42,6 +46,21 @@ def table(users_table: str):
     gs = gspread.service_account()
     sh = gs.open_by_key(users_table)
     return sh
+
+
+def create_new_day(user_table):
+    row = 2
+    column = 1
+    user_table = table(user_table)
+    # worksheet = user_table.get_worksheet(0)
+
+    if now_date() in user_table.get_worksheet(0).col_values(1):
+        pass
+    else:
+        while check_is_full(users_table=user_table.id, row=row, column=column):
+            row += 1
+        else:
+            upload_cell(users_table=user_table.id, row=row, column=column, data=now_date())
 
 
 

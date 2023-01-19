@@ -2,8 +2,7 @@ from logic_for_json import open_json, add_user_to_db, user_spreadsheetId
 import telebot
 from telebot import types
 from logic import now_time, now_date, add_answers, generator
-from logic_for_spreadsheet_API import create_table, upload_cell, check_is_full, table
-import re
+from logic_for_spreadsheet_API import create_table, upload_cell, check_is_full, table, create_new_day
 from datetime import datetime
 
 
@@ -18,8 +17,8 @@ def start(message):
     We are able to take any information about user from message.from_user]
     """
     markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
-    markup.add(types.KeyboardButton('Добавить день'))
-
+    markup.add(types.KeyboardButton('Уснул'))
+    markup.add(types.KeyboardButton('Проснулся'))
 
     first_name = message.from_user.first_name
     user_id = str(message.from_user.id)
@@ -37,40 +36,21 @@ def start(message):
 
 @bot.message_handler(regexp='^[0-2][0-3]:[0-5][0-9]$')
 def handle_time(message):
-    if message.text.strip() == '11:22':
-        new_var = datetime.strptime(message.text.strip(), '%H:%M').time()
-        # import pdb
-        # pdb.set_trace()
-        pass
+    new_var = datetime.strptime(message.text.strip(), '%H:%M').time()
+    # import pdb
+    # pdb.set_trace()
 
 
 @bot.message_handler(content_types=['text'])
 def handle_text(message):
-    row = 2
-    column = 1
     user_table = table(user_spreadsheetId(message))
     worksheet = user_table.get_worksheet(0)
 
     if message.text.strip() == 'Добавить день':
-        if now_date() in user_table.get_worksheet(0).col_values(1):
-
-            markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
-            markup.add(types.KeyboardButton('Проснулся'))
-            bot.send_message(message.chat.id, f'такая дата есть в таблице, добавить следующее действие', reply_markup=markup)
-            pass
-        else:
-            while check_is_full(users_table=user_table.id, row=row, column=column):
-                row += 1
-            else:
-                upload_cell(users_table=user_table.id, row=row, column=column, data=now_date())
-                markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
-
-
-                markup.add(types.KeyboardButton('Проснулся'))
-                markup.add(types.KeyboardButton('Добавить день'))
-                bot.send_message(message.chat.id, f'добавить следующее действие', reply_markup=markup)
+        create_new_day(user_table.id)
 
     elif message.text.strip() == 'Уснул':
+        create_new_day(user_table.id)
 
         cell = generator(worksheet.findall("Уснул"))
         row = worksheet.find(str(now_date()))._row
@@ -85,19 +65,17 @@ def handle_text(message):
             markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
 
             markup.add(types.KeyboardButton('Проснулся'))
-            markup.add(types.KeyboardButton('Добавить день'))
             bot.send_message(message.chat.id, f'добавить следующее действие', reply_markup=markup)
 
     elif message.text.strip() == 'Проснулся':
-
+        create_new_day(user_table.id)
 
         cell = generator(worksheet.findall("Проснулся"))
-        row = worksheet.find(str(now_date()))._row
+        row = worksheet.find(now_date())._row
         column = worksheet.find("Проснулся").col
 
         while check_is_full(users_table=user_table.id, column=column, row=row):
             column = next(cell)._col
-
         else:
             upload_cell(users_table=user_table.id, row=row, column=column, data=now_time())
             bot.send_message(message.chat.id, f'малыш проснулся в {now_time()}')
@@ -105,7 +83,7 @@ def handle_text(message):
 
             markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
             markup.add(types.KeyboardButton('Уснул'))
-            markup.add(types.KeyboardButton('Добавить день'))
+
             bot.send_message(message.chat.id, f'добавить следующее действие', reply_markup=markup)
 
 
