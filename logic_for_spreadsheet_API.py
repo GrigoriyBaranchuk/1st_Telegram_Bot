@@ -4,7 +4,7 @@ from logic import now_date
 
 
 """'turnkey-aleph-372212-94f79b4408eb.json'"""
-path = 'config/gspread/service_account.json'
+path = 'service_account.json'
 
 def create_table(name: str) -> str:
     """create table for new user with name = message.from_user.first_name
