@@ -4,9 +4,12 @@ from telebot import types
 from logic import now_time, now_date, add_answers, generator
 from logic_for_spreadsheet_API import create_table, upload_cell, check_is_full, table, create_new_day
 from datetime import datetime
+import gspread
 
 
 bot = telebot.TeleBot('5973958816:AAHFvf3ql5SvVmyq1azrZcTRU5p8JwQtfLE')
+path = 'service_account.json'
+gs = gspread.service_account(filename=path)
 
 
 @bot.message_handler(commands=['start', 'Назад'])
@@ -24,7 +27,7 @@ def start(message):
     user_id = str(message.from_user.id)
     users_list = [inst['pk'] for inst in open_json()] #crate list of users pk from db
     if user_id not in users_list:
-        spreadsheetId = create_table(name=first_name)
+        spreadsheetId = create_table(gs=gs, name=first_name)
         to_json = {"pk": user_id, "first_name": first_name, "spreadsheetId": spreadsheetId}
         add_user_to_db(to_json)
         bot.send_message(message.chat.id, f'привет {first_name}', reply_markup=markup)
@@ -41,21 +44,21 @@ def handle_time(message):
 
 @bot.message_handler(content_types=['text'])
 def handle_text(message):
-    user_table = table(user_spreadsheetId(message))
+    user_table = table(gs=gs, users_table=user_spreadsheetId(message))
     worksheet = user_table.get_worksheet(0)
 
     if message.text.strip() == 'Уснул':
-        create_new_day(user_table.id)
+        create_new_day(gs=gs, user_table=user_table.id)
 
         cell = generator(worksheet.findall("Уснул"))
         row = worksheet.find(str(now_date()))._row
         column = worksheet.find("Уснул").col
 
-        while check_is_full(users_table=user_table.id, column=column, row=row):
+        while check_is_full(gs=gs, users_table=user_table.id, column=column, row=row):
             column = next(cell)._col
 
         else:
-            upload_cell(users_table=user_table.id, row=row, column=column, data=now_time())
+            upload_cell(gs=gs, users_table=user_table.id, row=row, column=column, data=now_time())
             bot.send_message(message.chat.id, f'малыш уснул в {now_time()}')
 
 
@@ -64,16 +67,16 @@ def handle_text(message):
             bot.send_message(message.chat.id, f'добавить следующее действие', reply_markup=markup)
 
     elif message.text.strip() == 'Проснулся':
-        create_new_day(user_table.id)
+        create_new_day(gs=gs, user_table=user_table.id)
 
         cell = generator(worksheet.findall("Проснулся"))
         row = worksheet.find(now_date())._row
         column = worksheet.find("Проснулся").col
 
-        while check_is_full(users_table=user_table.id, column=column, row=row):
+        while check_is_full(gs=gs, users_table=user_table.id, column=column, row=row):
             column = next(cell)._col
         else:
-            upload_cell(users_table=user_table.id, row=row, column=column, data=now_time())
+            upload_cell(gs=gs, users_table=user_table.id, row=row, column=column, data=now_time())
             bot.send_message(message.chat.id, f'малыш проснулся в {now_time()}')
 
 
