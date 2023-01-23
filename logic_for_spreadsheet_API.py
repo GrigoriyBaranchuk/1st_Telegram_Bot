@@ -57,10 +57,10 @@ def create_new_day(gs, user_table):
     if now_date() in user_table.get_worksheet(0).col_values(1):
         pass
     else:
-        while check_is_full(users_table=user_table.id, row=row, column=column):
+        while check_is_full(gs=gs, users_table=user_table.id, row=row, column=column):
             row += 1
         else:
-            upload_cell(users_table=user_table.id, row=row, column=column, data=now_date())
+            upload_cell(gs=gs, users_table=user_table.id, row=row, column=column, data=now_date())
 
 
 
