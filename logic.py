@@ -1,6 +1,6 @@
 from datetime import datetime
 import pytz
-from telebot import types
+
 
 
 def now_time():
@@ -18,3 +18,11 @@ def generator(iter):
     for i in iter:
         yield i
 
+
+def multi_replase(string, replace_value=[':', ';', '/', '.', '_', '-', ',']):
+    for val in replace_value:
+        string = string.replace(val, ':')
+        if string.count(':') > 1:
+            string = string.replace(':', '')
+
+    return string
