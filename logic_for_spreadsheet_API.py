@@ -4,8 +4,8 @@ from logic import now_date
 
 
 """'turnkey-aleph-372212-94f79b4408eb.json'"""
-# path = 'service_account.json'
-path = '/app/.config/gspread'
+path = 'service_account.json'
+# path = '/app/.config/gspread'
 
 
 

@@ -8,8 +8,8 @@ import emoji
 
 
 bot = telebot.TeleBot('5973958816:AAHFvf3ql5SvVmyq1azrZcTRU5p8JwQtfLE')
-# path = 'service_account.json'
-path = '/app/.config/gspread'
+path = 'service_account.json'
+# path = '/app/.config/gspread'
 gs = gspread.service_account(filename=path)
 
 
