@@ -1,11 +1,10 @@
 from logic_for_json import open_json, add_user_to_db, user_spreadsheetId
 import telebot
-from telebot import types
 from logic import now_time, now_date, generator, multi_replase
 from logic_for_spreadsheet_API import create_table, upload_cell, check_is_full, table, create_new_day
 import re
-import emoji
 import gspread
+import emoji
 
 
 bot = telebot.TeleBot('5973958816:AAHFvf3ql5SvVmyq1azrZcTRU5p8JwQtfLE')
@@ -20,9 +19,9 @@ def start(message):
     message.from_user.first_name - first name of user.
     We are able to take any information about user from message.from_user]
     """
-    markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
-    markup.add(types.KeyboardButton('Уснул'))
-    markup.add(types.KeyboardButton('Проснулся'))
+    markup = telebot.types.ReplyKeyboardMarkup(resize_keyboard=True)
+    markup.add(telebot.types.KeyboardButton('Уснул'))
+    markup.add(telebot.types.KeyboardButton('Проснулся'))
 
     first_name = message.from_user.first_name
     user_id = str(message.from_user.id)
@@ -31,19 +30,21 @@ def start(message):
         spreadsheetId = create_table(gs=gs, name=first_name)
         to_json = {"pk": user_id, "first_name": first_name, "spreadsheetId": spreadsheetId}
         add_user_to_db(to_json)
-        bot.send_message(message.chat.id, f'привет, {first_name}, меня зовут "Фея Снов". Я - сонный бот Жени'
-                                          f' здесь ты сможешь быстро и удобно заполнить дневник снов\n\n\n'
-                                          f'Что я умею: отмечать за тебя в твоём дневнике снов '
-                                          f'когда малыш Проснулся и когда Уснул.\n\nЕсли ты не забыл(а) меня вести, то'
-                                          f' сразу после того как вы Уснули или Проснулись -  нажми на '
-                                          f'"Уснул" или "Проснулся". Если ты хочешь сам(а) внести время '
-                                          f'просто напиши мне "Уснул 11:05" или "Проснулся 11:05". \n\n'
-                                          f'Ах да- Я пойму, если у тебя принцеса, а не принц и ты '
-                                          f'напишешь мне "Уснула" или "Проснулась"))\n\n Чуствуй себя свободно и не беспокойся '
-                                          f'за разделитель между часами и минутами, !!!НО!!! помни  что формат ' 
-                                          f'времени только 24 часовой (Пример: "Проснулась в 01:12" - твоя малышка проснулась '
-                                          f'в 12 минут второго ночи). Приятного использования!!!\n\n'
-                                          f'{emoji.emojize(":SOS_button:")} И если что - звони Жене - не стесьняйся)))))', reply_markup=markup)
+        bot.send_message(message.chat.id,
+                         f'привет, {first_name}, меня зовут "Фея Снов". Я - сонный бот Жени'
+                         f' здесь ты сможешь быстро и удобно заполнить дневник снов\n\n\n'
+                         f'Что я умею: отмечать за тебя в твоём дневнике снов '
+                         f'когда малыш Проснулся и когда Уснул.\n\nЕсли ты не забыл(а) меня вести, то'
+                         f' сразу после того как вы Уснули или Проснулись -  нажми на '
+                         f'"Уснул" или "Проснулся". Если ты хочешь сам(а) внести время '
+                         f'просто напиши мне "Уснул 11:05" или "Проснулся 11:05". \n\n'
+                         f'Ах да- Я пойму, если у тебя принцеса, а не принц и ты '
+                         f'напишешь мне "Уснула" или "Проснулась"))\n\n Чуствуй себя свободно и не беспокойся '
+                         f'за разделитель между часами и минутами, !!!НО!!! помни  что формат '
+                         f'времени только 24 часовой (Пример: "Проснулась в 01:12" - твоя малышка проснулась '
+                         f'в 12 минут второго ночи). Приятного использования!!!\n\n'
+                         f'{emoji.emojize(":SOS_button:")} И если что - звони Жене - не стесьняйся)))))',
+                         reply_markup=markup)
     else:
         bot.send_message(message.chat.id, f'Привет {first_name} мы уже общались и у вас уже есть дневник снов'
                                           f' просто нажмите уснул малыш или проснулся',
@@ -73,8 +74,8 @@ def handle_time(message):
     else:
         upload_cell(gs=gs, users_table=user_table.id, row=row, column=column, data=data)
 
-    markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
-    markup.add(types.KeyboardButton('Уснул'))
+    markup = telebot.types.ReplyKeyboardMarkup(resize_keyboard=True)
+    markup.add(telebot.types.KeyboardButton('Уснул'))
     bot.send_message(message.chat.id, f'малыш Проснулся в {data}\n\nдобавить следующее действие', reply_markup=markup)
 
 
@@ -103,10 +104,11 @@ def handle_time(message):
         if not check_is_full(gs=gs, users_table=user_table.id, row=row, column=column - 1):
                     upload_cell(gs=gs, users_table=user_table.id, row=row, column=column-1, data=data)
 
-    markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
-    markup.add(types.KeyboardButton('Проснулся'))
+    markup = telebot.types.ReplyKeyboardMarkup(resize_keyboard=True)
+    markup.add(telebot.types.KeyboardButton('Проснулся'))
     bot.send_message(message.chat.id, f'малыш уснул в {data} \n\nдобавить следующее действие', reply_markup=markup)
 
 
-bot.polling(none_stop=True)
+# bot.polling(none_stop=True)
+bot.infinity_polling(timeout=10, long_polling_timeout=5)
 

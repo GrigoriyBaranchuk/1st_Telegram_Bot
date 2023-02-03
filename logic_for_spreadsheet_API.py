@@ -4,7 +4,9 @@ from logic import now_date
 
 
 """'turnkey-aleph-372212-94f79b4408eb.json'"""
-path = 'service_account.json'
+# path = 'service_account.json'
+path = '/app/.config/gspread'
+
 
 
 def create_table(gs, name: str) -> str:
@@ -14,8 +16,7 @@ def create_table(gs, name: str) -> str:
     sh.share('baranchukoff@gmail.com', perm_type='user', role='writer')
     worksheet = sh.get_worksheet(0)
     # TODO change 'Проснулся', 'Уснул', to loop with range
-    worksheet.update('B1:W1', [['Проснулся', 'Уснул', 'Проснулся', 'Уснул', 'Проснулся', 'Уснул', 'Проснулся', 'Уснул',
-                                'Проснулся', 'Уснул', 'Проснулся', 'Уснул', 'Проснулся', 'Уснул']])
+    worksheet.update('B1: Z1', [['Проснулся', 'Уснул'] * 11])
     spreadsheetId = sh.id
     return spreadsheetId
 
