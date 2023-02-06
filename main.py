@@ -5,6 +5,9 @@ from logic_for_spreadsheet_API import create_table, upload_cell, check_is_full, 
 import re
 import gspread
 import emoji
+import time
+
+
 
 
 bot = telebot.TeleBot('5973958816:AAHFvf3ql5SvVmyq1azrZcTRU5p8JwQtfLE')
@@ -60,10 +63,16 @@ def handle_time(message):
     time_from_user = multi_replase(message_from_user.split(' ')[-1])
     pattern = '[0-2][0-9]:[0-5][0-9]'
 
+
+
     if not re.fullmatch(pattern=pattern, string=time_from_user):
         data = now_time()
     else:
         data = time_from_user
+
+    markup = telebot.types.ReplyKeyboardMarkup(resize_keyboard=True)
+    markup.add(telebot.types.KeyboardButton('Уснул'))
+    bot.send_message(message.chat.id, f'малыш Проснулся в {data}\n\nдобавить следующее действие', reply_markup=markup)
 
     create_new_day(gs=gs, user_table=user_table.id)
     cell = generator(worksheet.findall("Проснулся"))
@@ -72,12 +81,11 @@ def handle_time(message):
 
     while check_is_full(gs=gs, users_table=user_table.id, column=column, row=row):
         column = next(cell)._col
+        time.sleep(0.2)
     else:
         upload_cell(gs=gs, users_table=user_table.id, row=row, column=column, data=data)
 
-    markup = telebot.types.ReplyKeyboardMarkup(resize_keyboard=True)
-    markup.add(telebot.types.KeyboardButton('Уснул'))
-    bot.send_message(message.chat.id, f'малыш Проснулся в {data}\n\nдобавить следующее действие', reply_markup=markup)
+
 
 
 @bot.message_handler(regexp='([Уу]снул[а-я]{0,1})(\s){0,2}[в]{0,1}(\s){0,2}([0-2][0-9][:;/.\-,][0-5][0-9]){0,1}')
@@ -93,6 +101,10 @@ def handle_time(message):
     else:
         data = time_from_user
 
+    markup = telebot.types.ReplyKeyboardMarkup(resize_keyboard=True)
+    markup.add(telebot.types.KeyboardButton('Проснулся'))
+    bot.send_message(message.chat.id, f'малыш уснул в {data} \n\nдобавить следующее действие', reply_markup=markup)
+
     create_new_day(gs=gs, user_table=user_table.id)
     cell = generator(worksheet.findall("Уснул"))
     row = worksheet.find(now_date())._row
@@ -100,14 +112,11 @@ def handle_time(message):
 
     while check_is_full(gs=gs, users_table=user_table.id, column=column, row=row):
         column = next(cell)._col
+        time.sleep(0.2)
     else:
         upload_cell(gs=gs, users_table=user_table.id, row=row, column=column, data=data)
         if not check_is_full(gs=gs, users_table=user_table.id, row=row, column=column - 1):
                     upload_cell(gs=gs, users_table=user_table.id, row=row, column=column-1, data=data)
-
-    markup = telebot.types.ReplyKeyboardMarkup(resize_keyboard=True)
-    markup.add(telebot.types.KeyboardButton('Проснулся'))
-    bot.send_message(message.chat.id, f'малыш уснул в {data} \n\nдобавить следующее действие', reply_markup=markup)
 
 
 # bot.polling(none_stop=True)
